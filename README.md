@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kargo Shortlist
 
-## Getting Started
+A hiring dashboard for Arjun (founder, Kargo). It ranks every PM and SPM applicant, explains each score with quotes from the CV, writes an interview brief for the top five, and drafts an invite or rejection for everyone.
+**The system ranks and explains. Arjun decides.** No email goes out without his Confirm & send.
 
-First, run the development server:
+## How it follows the component map
+
+| Map row | Here |
+| --- | --- |
+| **Founder · Trigger/Input**: uploads CV + selects role | `/upload`: drag-and-drop, role per file → `POST /api/candidates` |
+| **System · Context**: extracts info, excludes personal details from AI | `src/lib/pii.ts`: name/email/phone/links split into their own columns; `cv_content` is the anonymised text. `assertNoPersonalDetails` runs before **every** AI call |
+| **System · Processing**: scores against PM **and** SPM rubrics | `src/lib/pipeline.ts`: one Gemini call per CV scores all 10 criteria; weighted totals are computed in code; quotes that can't be found in the CV cap that criterion at 1 |
+| **AI Models**: interview brief + personalised email | `src/lib/drafts.ts`: top 5 per role → 3-sentence brief + invite; everyone else → rejection. Drafts use `{{first_name}}`; the real name is added only at send time |
+| **Email Service**: Resend, when founder clicks send | `src/lib/email.ts`, called only from `POST /api/candidates/:id/send` with `{confirm:true}` |
+| **Founder · Output**: dashboard | `/` ranked shortlist per role with the line after #5; `/candidates/:id` for detail and review; `/outbox`; `/instincts` |
+
+## The founder model (`rubric.txt`)
+
+Built from the 8 past hires, not from the JDs. Four patterns in the high-rated hires (worked on an ops floor first, built unrequested fixes that others adopted, owned outcomes with no layer above, candid about failure). Plus one anti-signal: polished credentials with no outcomes, which is why the highest-credentialed hire is rated low. PM and SPM each have 5 criteria and weights that add to 100. Each criterion names the hires behind it. `/instincts` shows the model.
+
+The hire ratings in the outcomes table are **inferred from the CVs**. If Arjun's real ratings differ, edit `rubric.txt`, then run `npm run seed:rubric` again.
+
+## Features added beyond the brief
+
+- **Most like a past hire**: each candidate is matched to the anonymised past hire they most resemble.
+- **Evidence check**: every criterion quote is verified against the CV text. If a quote isn't there, the score is capped and flagged in red.
+- **Cross-role flag**: shows when someone who applied for PM would make the SPM top five, or the other way round.
+- **Duplicate CV detection**: catches identical or near-identical CVs sent under different names.
+- **Founder overrides**: Arjun can move anyone above or below the line. The brief and draft regenerate to match, and the override is marked as his call.
+
+## Run
 
 ```bash
+npm install
+cp .env.example .env.local        # fill in keys
+# Supabase SQL editor: run supabase/migrations/001_schema.sql
+npm run seed:rubric
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm test                          # unit tests
+npm run test:e2e                  # 3-CV acceptance test against the running app
+npm run upload:bulk -- ../resumes_ roles.json   # all CVs via the API
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without `GEMINI_API_KEY`, local dev uses a clearly labelled keyword mock. Production refuses to run without the real model, and also refuses to serve without `DASHBOARD_PASSWORD`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Privacy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Personal details are separated from the CV when it's uploaded. Gemini only ever receives the anonymised content.
+- Use a billed Gemini API key: the free tier may use prompts to train Google's models.
+- Supabase tables have RLS switched on with no policies, so the anon key can read nothing. The server uses the service-role key, which is never exposed to the browser.
+- `EMAIL_TEST_RECIPIENT` redirects every send to a test inbox.

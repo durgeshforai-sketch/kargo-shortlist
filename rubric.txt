@@ -1,0 +1,75 @@
+KARGO HIRING RUBRIC — built from Arjun's 8 past hires, not from the job descriptions
+===================================================================================
+
+STEP 1 — OUTCOMES TABLE (inferred)
+----------------------------------
+No performance ratings were supplied with the hire files, so each rating below is
+inferred from the CV itself: visible impact, adoption of what the person built,
+and how closely their trajectory matches what Kargo needs. Replace with Arjun's real
+ratings when available and re-run `npm run seed:rubric`.
+
+  Hire                   Role hired into          Inferred rating
+  Rohan Desai            Senior engineer          HIGH
+  Sunita Krishnamurthy   Operations               HIGH
+  Lavanya Iyer           Product Manager          HIGH
+  Meghna Tiwari          Customer Success         HIGH
+  Aditya Shetty          Enterprise Sales         HIGH
+  Rahul Bose             Marketing                MEDIUM
+  Preetham Rao           Backend engineer         LOW
+  Vikram Nair            Product Manager          LOW
+
+STEP 2 — PATTERNS IN THE HIGH-RATED HIRES THAT THE JDs DO NOT ASK FOR
+---------------------------------------------------------------------
+P1  "Was in the room before building for it."
+    Four of the five high-rated hires worked hands-on in freight/logistics ops
+    before moving into their function: Rohan (CHA ops at JNPT), Sunita (freight
+    documentation), Meghna (freight customer desk), Lavanya (3PL carrier ops),
+    Aditya (port terminal sales). The two low-rated hires have none of this.
+    The PM JD asks only for "curiosity" about ops; Arjun's hires actually did the work.
+
+P2  "Built the fix nobody asked for — and people adopted it."
+    Rohan's Excel tracker (12-person team in 2 weeks) and weekend BoL prototype
+    (30 users in a month); Sunita's weekend workflow redesign kept permanently;
+    Lavanya's visibility dashboard adopted by 2 other teams; Meghna's onboarding
+    framework used by the whole CS team. The signal is unprompted + adopted by peers,
+    not "shipped N features". Vikram's 12 features were assigned roadmap output.
+
+P3  "No layer above them, and it didn't show."
+    High-rated hires describe owning outcomes with nobody between them and the
+    result: Rohan ("without a product layer"), Aditya ("no account manager layer"),
+    Meghna ("no escalation to management in 14 months"), Lavanya ("sole PM",
+    "she doesn't hedge"). Low-rated hires worked inside large teams (Preetham: one of
+    12 engineers) or with senior PMs above (Vikram).
+
+P4  "Says out loud what failed."
+    Aditya's written post-mortem on a lost freight deal, Lavanya killing 2 features
+    on usage data and owning an outage post-mortem, Meghna surfacing an undocumented
+    product limitation. Candour about failure, backed by an artefact.
+
+ANTI-SIGNAL  "Polish without proof."
+    Vikram is the most credentialed CV in the set (XLRI, CPO cert, Reforge, conference
+    speaker, PRD templates) and is rated LOW. Certifications, frameworks, talks and
+    brand-name employers earn ZERO points on their own. Only evidence of outcomes scores.
+
+STEP 3 — RUBRIC
+---------------
+Scoring scale for every criterion: 0–5
+  5 = strong, specific evidence (numbers, named artefact, adoption)
+  3 = some evidence, partial or generic
+  1 = claimed but unsupported
+  0 = no evidence
+Weighted score = sum(score / 5 × weight). Maximum 100 per role.
+
+[PM] Product Manager — core operations platform (2–4 yrs)
+PM1 | Ground-floor operations exposure | 25 | Has done operational work in logistics, freight, supply chain or another ops-heavy floor (not just interviewed users). Backed by P1: Rohan, Sunita, Meghna, Lavanya, Aditya.
+PM2 | Unprompted builder with adoption | 25 | Built a tool, process or feature without being asked, and others adopted it; adoption numbers count most. Backed by P2: Rohan's tracker, Sunita's redesign, Lavanya's dashboard, Meghna's framework.
+PM3 | Ship, kill and learn in short cycles | 20 | Evidence of shipping to real users, killing what didn't work, and writing down why (post-mortems, pivots driven by usage data). Backed by P4: Lavanya, Aditya.
+PM4 | Ownership without scaffolding | 20 | Owned a product area or outcome alone, built the missing process/rhythm themselves, no senior layer making the calls. Backed by P3: Lavanya (sole PM), Rohan, Meghna.
+PM5 | Stage and level fit | 10 | Roughly 2–4 years of product (or equivalent building) experience at an early or growth-stage company; Mumbai/relocation-ready. Low-rated Vikram shows big-platform polish is not the target.
+
+[SPM] Senior Product Manager — integration and data layer (5–8 yrs)
+SPM1 | Integration and platform depth | 25 | Has owned integrations, APIs, data pipelines, or products living inside carrier/ERP/port/partner systems, with reliability or data-quality outcomes. Backed by Rohan (vendor migration, 60% lag cut), Lavanya (API docs cut integration time 2 weeks).
+SPM2 | Consequential calls, owned alone | 25 | Made hard build/configure/avoid calls with no committee above and lived with the result; names the trade-off. Backed by P3 + P4: Lavanya ("doesn't hedge"), Rohan (migration under pressure), Aditya (post-mortem).
+SPM3 | Operations-industry grounding | 20 | Time on the floor in logistics, supply chain, ports, or a comparable ops-heavy domain. Backed by P1: all five high-rated hires.
+SPM4 | Built the practice, not just the product | 15 | Created standards, frameworks, on-call, review or onboarding practices that others then ran on. Backed by P2: Rohan (code review + on-call, P1s -40%), Meghna (30-60-90 framework), Sunita (SOPs adopted in 60 days).
+SPM5 | Seniority and early-stage fit | 15 | Roughly 5–8 years with at least one stretch in an early-stage or unstructured environment; Mumbai/relocation-ready.

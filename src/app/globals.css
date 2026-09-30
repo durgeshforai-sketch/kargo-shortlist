@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-paper: #f5f2ea;
+  --color-card: #fffdf8;
+  --color-ink: #13233f;
+  --color-muted: #5f6b7d;
+  --color-rule: #ddd6c6;
+  --color-cargo: #d9531e;
+  --color-cargo-soft: #fbe3d6;
+  --color-go: #1f7a55;
+  --color-go-soft: #dcf0e6;
+  --color-hold: #9a6b00;
+  --color-hold-soft: #f7ecc9;
+  --color-stop: #a23a3a;
+  --color-stop-soft: #f5dddd;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* Container-stripe motif used on the header and the ranking line. */
+.stripes {
+  background-image: repeating-linear-gradient(90deg, var(--color-ink) 0 14px, #1c3157 14px 16px);
+}
+.cut-line {
+  background-image: repeating-linear-gradient(90deg, var(--color-cargo) 0 10px, transparent 10px 16px);
+  height: 2px;
 }
