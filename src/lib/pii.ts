@@ -55,7 +55,8 @@ function isPhone(candidate: string): boolean {
 }
 
 export function separatePersonalDetails(rawText: string, fileName: string): { personal: Personal; content: string } {
-  const text = rawText.replace(/ /g, " ");
+  // Postgres text columns reject NUL; some PDF text layers contain it.
+  const text = rawText.replace(/\u0000/g, "").replace(/\u00a0/g, " ");
   // Text layers sometimes glue an upper-case name onto the address ("REDDYsquad_5@…").
   const email = text.match(EMAIL_RE)?.[0]?.replace(/^[A-Z]{2,}(?=[a-z0-9])/, "").toLowerCase() ?? null;
   const phone = (text.match(PHONE_RE) ?? []).find(isPhone)?.trim() ?? null;
