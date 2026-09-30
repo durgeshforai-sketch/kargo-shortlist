@@ -33,7 +33,7 @@ The hire ratings in the outcomes table are **inferred from the CVs**. If Arjun's
 ```bash
 npm install
 cp .env.example .env.local        # fill in keys
-# Supabase SQL editor: run supabase/migrations/001_schema.sql
+# Supabase SQL editor: run supabase/migrations/20260930000000_schema.sql
 npm run seed:rubric
 npm run dev
 npm test                          # unit tests

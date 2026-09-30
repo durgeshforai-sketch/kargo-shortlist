@@ -8,9 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/*.test.ts",
-    "seed:rubric": "tsx scripts/seed-rubric.ts",
-    "upload:bulk": "tsx scripts/bulk-upload.ts",
-    "test:e2e": "tsx scripts/e2e.ts"
+    "seed:rubric": "tsx scripts/seed-rubric.mts",
+    "upload:bulk": "tsx scripts/bulk-upload.mts",
+    "test:e2e": "tsx scripts/e2e.mts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

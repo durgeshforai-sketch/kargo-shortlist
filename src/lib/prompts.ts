@@ -88,7 +88,8 @@ export function briefPrompt(input: {
   return `${HOUSE_RULES}
 
 TASK: Write Arjun's interview brief for a ${ROLE_LABEL[input.role]} candidate ranked #${input.rank} (score ${input.score}/100).
-Exactly 3 sentences, plain text, no bullet points, no preamble. Refer to them as "the candidate".
+Exactly 3 sentences, each under 30 words. Plain text, no bullet points, no preamble. Refer to them as "the candidate".
+Only raise gaps that matter for THIS role.
 Sentence 1: why they rank here, in Kargo terms.
 Sentence 2: the single strongest piece of evidence from the CV.
 Sentence 3: the one thing Arjun must test in the interview.

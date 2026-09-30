@@ -4,7 +4,7 @@ import { basename, join } from "node:path";
 
 /**
  * Uploads a folder of CVs through the real API, exactly as the founder would from /upload.
- * Usage: BASE_URL=https://… npx tsx scripts/bulk-upload.ts <folder> [roles.json]
+ * Usage: BASE_URL=https://… npx tsx scripts/bulk-upload.mts <folder> [roles.json]
  * roles.json maps file name → "PM" | "SPM"; files named pm_/spm_ are detected automatically.
  */
 const [folder, rolesFile] = process.argv.slice(2);
