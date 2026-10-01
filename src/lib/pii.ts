@@ -61,8 +61,12 @@ export function separatePersonalDetails(rawText: string, fileName: string): { pe
   const email = text.match(EMAIL_RE)?.[0]?.replace(/^[A-Z]{2,}(?=[a-z0-9])/, "").toLowerCase() ?? null;
   const phone = (text.match(PHONE_RE) ?? []).find(isPhone)?.trim() ?? null;
   const links = Array.from(new Set((text.match(PERSONAL_LINK_RE) ?? []).map((l) => l.trim()))).filter((l) => l.length > 12);
-  // A file named after the candidate is the most reliable source; the CV header is the fallback.
-  const full_name = nameFromFileName(fileName) ?? nameFromHeader(text);
+  // Prefer the CV header when the file name confirms it (it drops file-name noise like "test" or "final");
+  // otherwise the file name is the more reliable source, and the header is the last resort.
+  const fromFile = nameFromFileName(fileName);
+  const fromHeader = nameFromHeader(text);
+  const confirmed = fromHeader && fromFile && fromHeader.toLowerCase().split(" ").every((p) => fromFile.toLowerCase().split(" ").includes(p));
+  const full_name = confirmed ? fromHeader : (fromFile ?? fromHeader);
 
   let content = text
     .replace(EMAIL_RE, "[EMAIL]")

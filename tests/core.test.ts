@@ -50,6 +50,11 @@ test("privacy guard blocks leaks", () => {
   assert.throws(() => assertNoPersonalDetails("about Priya Krishnan", personal), /name/);
 });
 
+test("CV header name wins when the file name confirms it", () => {
+  assert.equal(separatePersonalDetails("Tara Fernandes\nProduct Manager\nWorked in freight ops.", "pm_test_tara_fernandes.txt").personal.full_name, "Tara Fernandes");
+  assert.equal(separatePersonalDetails("Core Skills\nSQL", "pm_01_priya_krishnan.pdf").personal.full_name, "Priya Krishnan");
+});
+
 test("name from file name", () => {
   assert.equal(nameFromFileName("spm_16_siddharth_rao.pdf"), "Siddharth Rao");
   assert.equal(nameFromFileName("cv.pdf"), null);
