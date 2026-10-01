@@ -7,7 +7,7 @@ export const maxDuration = 60;
 /** Re-rank, then generate the briefs and invite/rejection drafts that are missing or out of date. */
 export async function POST() {
   try {
-    return NextResponse.json(await syncDrafts(6));
+    return NextResponse.json(await syncDrafts());
   } catch (e) {
     return fail(e);
   }

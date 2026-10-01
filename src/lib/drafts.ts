@@ -20,12 +20,13 @@ function proposedTier(c: Candidate, rank: number): "interview" | "decline" {
 
 /**
  * Brings tiers, briefs and email drafts in line with the current ranking.
- * Does at most `budget` AI calls per run so it fits a serverless time limit; returns what is left.
+ * Stops starting AI calls after `budgetMs` so a run fits the serverless time limit; returns what is left.
  * Never touches an email that has already been sent.
  */
-export async function syncDrafts(budget = 6): Promise<{ done: number; remaining: number }> {
+export async function syncDrafts(budgetMs = 35_000): Promise<{ done: number; remaining: number }> {
   const all = await listCandidates();
   const criteria = await getCriteria();
+  const deadline = Date.now() + budgetMs;
   let done = 0;
   let remaining = 0;
 
@@ -44,7 +45,7 @@ export async function syncDrafts(budget = 6): Promise<{ done: number; remaining:
         if (patch.tier) await updateCandidate(c.id, patch);
         continue;
       }
-      if (done >= budget) {
+      if (Date.now() > deadline) {
         remaining++;
         if (patch.tier) await updateCandidate(c.id, patch);
         continue;
