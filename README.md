@@ -43,6 +43,8 @@ npm run upload:bulk -- ../resumes_ roles.json   # all CVs via the API
 
 Without `GEMINI_API_KEY`, local dev uses a clearly labelled keyword mock. Production refuses to run without the real model.
 
+**Login:** every page and API route requires a session. Set `DASHBOARD_USER`, `DASHBOARD_PASSWORD` and `SESSION_SECRET`. Sessions are signed, HTTP-only cookies that last 7 days, and production refuses to serve if no password is set. The demo login is shown as placeholder text on the login page.
+
 ## Privacy
 
 - Personal details are separated from the CV when it's uploaded. Gemini only ever receives the anonymised content.

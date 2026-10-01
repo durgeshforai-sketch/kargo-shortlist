@@ -1,4 +1,5 @@
 import "./load-env";
+import { authHeaders } from "./auth";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -11,7 +12,7 @@ import { createClient } from "@supabase/supabase-js";
  */
 const base = process.env.BASE_URL ?? "http://localhost:3000";
 const folder = process.env.CV_DIR ?? "../resumes_";
-const auth: Record<string, string> = process.env.DASHBOARD_PASSWORD ? { authorization: `Basic ${btoa(`arjun:${process.env.DASHBOARD_PASSWORD}`)}` } : {};
+const auth = await authHeaders(base);
 const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 
 const CASES = [

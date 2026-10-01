@@ -1,4 +1,5 @@
 import "./load-env";
+import { authHeaders } from "./auth";
 import { readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
@@ -10,7 +11,7 @@ import { basename, join } from "node:path";
 const [folder, rolesFile] = process.argv.slice(2);
 const base = process.env.BASE_URL ?? "http://localhost:3000";
 const roles: Record<string, "PM" | "SPM"> = rolesFile ? JSON.parse(readFileSync(rolesFile, "utf8")) : {};
-const auth: Record<string, string> = process.env.DASHBOARD_PASSWORD ? { authorization: `Basic ${btoa(`arjun:${process.env.DASHBOARD_PASSWORD}`)}` } : {};
+const auth = await authHeaders(base);
 
 const files = readdirSync(folder).filter((f) => /\.(pdf|docx|txt)$/i.test(f)).sort();
 const roleOf = (f: string) => roles[f] ?? (/^spm_/i.test(f) ? "SPM" : /^pm_/i.test(f) ? "PM" : null);
