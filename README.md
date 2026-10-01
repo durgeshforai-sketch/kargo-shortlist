@@ -49,3 +49,9 @@ Without `GEMINI_API_KEY`, local dev uses a clearly labelled keyword mock. Produc
 - Use a billed Gemini API key: the free tier may use prompts to train Google's models.
 - Supabase tables have RLS switched on with no policies, so the anon key can read nothing. The server uses the service-role key, which is never exposed to the browser.
 - `EMAIL_TEST_RECIPIENT` redirects every send to a test inbox.
+
+## Deployment notes
+
+- Live: https://kargo-shortlist-three.vercel.app (Vercel, functions pinned to Mumbai `bom1`); Supabase project `kargo-shortlist` in `ap-south-1`.
+- Email runs in test mode. Resend's shared sender (`onboarding@resend.dev`) only delivers to the Resend account owner, so `EMAIL_TEST_RECIPIENT` is set to that address. To email real candidates, verify a domain in Resend, set `EMAIL_FROM` to an address on it, and clear `EMAIL_TEST_RECIPIENT`.
+- Checkpoint results: all 60 CVs scored on both rubrics; top 5 per role have a brief + invite draft, the other 50 have rejection drafts; one near-duplicate pair flagged; full loop (upload → brief/draft → Confirm & send → `sent` in Supabase) verified with two fictional test CVs, since removed.
