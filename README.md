@@ -41,7 +41,7 @@ npm run test:e2e                  # 3-CV acceptance test against the running app
 npm run upload:bulk -- ../resumes_ roles.json   # all CVs via the API
 ```
 
-Without `GEMINI_API_KEY`, local dev uses a clearly labelled keyword mock. Production refuses to run without the real model, and also refuses to serve without `DASHBOARD_PASSWORD`.
+Without `GEMINI_API_KEY`, local dev uses a clearly labelled keyword mock. Production refuses to run without the real model.
 
 ## Privacy
 

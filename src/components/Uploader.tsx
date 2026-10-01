@@ -31,7 +31,7 @@ export function Uploader() {
     const worker = async () => {
       for (let next = queue.shift(); next; next = queue.shift()) {
         const { it, i } = next;
-        patch(i, { state: "working", note: "extracting & scoring…" });
+        patch(i, { state: "working", note: "Extracting and scoring" });
         try {
           const fd = new FormData();
           fd.append("file", it.file);
@@ -39,7 +39,7 @@ export function Uploader() {
           const res = await fetch("/api/candidates", { method: "POST", body: fd });
           const json = await res.json();
           if (!res.ok || json.status === "error") throw new Error(json.error ?? "failed");
-          patch(i, { state: "done", id: json.id, note: `PM ${json.pm_score} · SPM ${json.spm_score}${json.duplicate_of ? " · duplicate CV" : ""}` });
+          patch(i, { state: "done", id: json.id, note: `PM ${json.pm_score} · SPM ${json.spm_score}${json.duplicate_of ? " · Duplicate CV" : ""}` });
         } catch (e) {
           patch(i, { state: "error", note: (e as Error).message });
         }
@@ -55,7 +55,7 @@ export function Uploader() {
       const json = await res.json().catch(() => ({ error: "bad response" }));
       if (!res.ok) { setDraftNote(json.error); break; }
       total += json.done;
-      setDraftNote(`${total} briefs/drafts written · ${json.remaining} left`);
+      setDraftNote(`${json.remaining} drafts remaining`);
       if (json.remaining === 0 || json.done === 0) break;
     }
     setPhase("done");
@@ -63,67 +63,79 @@ export function Uploader() {
 
   const counts = { done: items.filter((x) => x.state === "done").length, err: items.filter((x) => x.state === "error").length };
 
-  return (
-    <div className="space-y-5">
-      <div
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); add(e.dataTransfer.files); }}
-        onClick={() => input.current?.click()}
-        className="cursor-pointer rounded-lg border-2 border-dashed border-rule bg-card px-6 py-10 text-center hover:border-cargo"
-      >
-        <p className="font-medium">Drop CVs here or click to choose</p>
-        <p className="mt-1 text-sm text-muted">PDF, DOCX or TXT · many at once is fine</p>
-        <input ref={input} type="file" multiple accept=".pdf,.docx,.txt" className="hidden" onChange={(e) => add(e.target.files)} />
-      </div>
+  const pendingCount = items.filter((x) => x.state === "queued" || x.state === "error").length;
+  const running = phase === "scoring" || phase === "drafting";
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="text-sm">
-          Applied role for new files{" "}
-          <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="ml-1 rounded border border-rule bg-white px-2 py-1.5">
-            <option value="PM">PM — Product Manager</option>
-            <option value="SPM">SPM — Senior Product Manager</option>
-          </select>
-        </label>
-        <span className="text-xs text-muted">Files named pm_… / spm_… are pre-set. You can change each one below.</span>
-        <button
-          onClick={start}
-          disabled={phase === "scoring" || phase === "drafting" || !items.some((x) => x.state === "queued" || x.state === "error")}
-          className="ml-auto rounded bg-cargo px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
-        >
-          {phase === "scoring" ? "Scoring…" : phase === "drafting" ? "Writing drafts…" : `Process ${items.filter((x) => x.state === "queued" || x.state === "error").length} CVs`}
-        </button>
-      </div>
+  return (
+    <div className="space-y-3">
+      <section className="card">
+        <div className="card-header">Select Files</div>
+        <div className="card-body space-y-3">
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => { e.preventDefault(); add(e.dataTransfer.files); }}
+            className="flex flex-wrap items-center justify-center gap-3 rounded border border-dashed border-line-strong bg-head/50 px-6 py-8"
+          >
+            <button onClick={() => input.current?.click()} className="btn">Upload Files</button>
+            <span className="text-weak">or drop files here · PDF, DOCX or TXT</span>
+            <input ref={input} type="file" multiple accept=".pdf,.docx,.txt" className="hidden" onChange={(e) => add(e.target.files)} />
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="block">
+              <span className="field-label">Default Applied Role</span>
+              <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="input mt-1 w-64">
+                <option value="PM">Product Manager</option>
+                <option value="SPM">Senior Product Manager</option>
+              </select>
+            </label>
+            <p className="pb-2 text-xs text-weak">Files named pm_… or spm_… are assigned automatically. You can change the role for each file below.</p>
+            <button onClick={start} disabled={running || pendingCount === 0} className="btn btn-brand ml-auto">
+              {phase === "scoring" ? "Scoring…" : phase === "drafting" ? "Preparing drafts…" : `Process ${pendingCount} File${pendingCount === 1 ? "" : "s"}`}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {items.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-rule bg-card">
-          <div className="flex justify-between border-b border-rule px-4 py-2 font-mono text-xs text-muted">
-            <span>{items.length} files · {counts.done} scored · {counts.err} failed</span>
-            {draftNote && <span>{draftNote}</span>}
+        <section className="card">
+          <div className="card-header">
+            <span>Files ({items.length})</span>
+            <span className="text-xs font-normal text-weak">
+              {counts.done} completed · {counts.err} failed{draftNote ? ` · ${draftNote}` : ""}
+            </span>
           </div>
-          <ul className="max-h-[480px] divide-y divide-rule/70 overflow-auto text-sm">
-            {items.map((it, i) => (
-              <li key={i} className="flex items-center gap-3 px-4 py-2">
-                <span className="w-5 text-center">{it.state === "done" ? "✓" : it.state === "error" ? "✕" : it.state === "working" ? "…" : "·"}</span>
-                <span className="flex-1 truncate">{it.id ? <Link className="hover:text-cargo" href={`/candidates/${it.id}`}>{it.file.name}</Link> : it.file.name}</span>
-                <select
-                  value={it.role}
-                  disabled={it.state !== "queued" && it.state !== "error"}
-                  onChange={(e) => patch(i, { role: e.target.value as Role })}
-                  className="rounded border border-rule bg-white px-1 py-0.5 text-xs"
-                >
-                  <option>PM</option>
-                  <option>SPM</option>
-                </select>
-                <span className={`w-64 truncate text-right text-xs ${it.state === "error" ? "text-stop" : "text-muted"}`}>{it.note}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="max-h-[520px] overflow-auto">
+            <table className="table w-full">
+              <thead>
+                <tr><th>File Name</th><th className="w-40">Applied Role</th><th className="w-28">Status</th><th>Result</th></tr>
+              </thead>
+              <tbody>
+                {items.map((it, i) => (
+                  <tr key={i}>
+                    <td className="max-w-[320px] truncate">{it.id ? <Link className="link" href={`/candidates/${it.id}`}>{it.file.name}</Link> : it.file.name}</td>
+                    <td>
+                      <select value={it.role} disabled={it.state !== "queued" && it.state !== "error"} onChange={(e) => patch(i, { role: e.target.value as Role })} className="input !py-1">
+                        <option value="PM">Product Manager</option>
+                        <option value="SPM">Senior Product Manager</option>
+                      </select>
+                    </td>
+                    <td>
+                      <span className={`text-xs ${it.state === "done" ? "text-ok" : it.state === "error" ? "text-bad" : "text-weak"}`}>
+                        {{ queued: "Queued", working: "Processing", done: "Completed", error: "Failed" }[it.state]}
+                      </span>
+                    </td>
+                    <td className={`max-w-[320px] truncate text-xs ${it.state === "error" ? "text-bad" : "text-weak"}`}>{it.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
       {phase === "done" && (
-        <p className="text-sm">
-          Done. <Link href="/" className="text-cargo underline">Open the shortlist →</Link>
-        </p>
+        <div className="card border-l-4 border-l-ok px-4 py-2.5">
+          Processing complete. <Link href="/" className="link">View candidates</Link>
+        </div>
       )}
     </div>
   );

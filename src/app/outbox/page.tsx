@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { Card, Eyebrow, Pill, SetupNotice } from "@/components/ui";
+import { Badge, PageHeader, SetupNotice } from "@/components/ui";
 import { listCandidates } from "@/lib/db";
 import { recipientFor } from "@/lib/email";
 import { env } from "@/lib/env";
@@ -15,42 +15,49 @@ export default async function Outbox() {
     return <SetupNotice message={(e as Error).message} />;
   }
   const groups: { title: string; rows: Candidate[] }[] = [
-    { title: "Interview invites awaiting your confirm", rows: all.filter((c) => c.email_status === "draft" && c.email_kind === "invite") },
-    { title: "Rejections awaiting your confirm", rows: all.filter((c) => c.email_status === "draft" && c.email_kind === "rejection") },
+    { title: "Interview Invites", rows: all.filter((c) => c.email_status === "draft" && c.email_kind === "invite") },
+    { title: "Decline Emails", rows: all.filter((c) => c.email_status === "draft" && c.email_kind === "rejection") },
     { title: "Failed", rows: all.filter((c) => c.email_status === "failed") },
     { title: "Sent", rows: all.filter((c) => c.email_status === "sent").sort((a, b) => (b.sent_at ?? "").localeCompare(a.sent_at ?? "")) },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Eyebrow>Step 3 · you confirm</Eyebrow>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">Outbox</h1>
-        <p className="mt-1 text-sm text-muted">
-          Every email is a draft until you open it and click Confirm &amp; send. There is no bulk send, so no candidate is rejected without you reading it.
-          {env.testRecipient && <> Test mode is on: every send goes to <b>{env.testRecipient}</b>.</>}
-        </p>
+    <>
+      <PageHeader
+        icon="mail"
+        object="Outbox"
+        title="Candidate Emails"
+        meta={`Each email is reviewed and sent individually from the candidate record.${env.testRecipient ? ` Test mode: all emails are delivered to ${env.testRecipient}.` : ""}`}
+      />
+      <div className="space-y-3">
+        {groups.map((g) => (
+          <section key={g.title} className="card">
+            <div className="card-header">{g.title} ({g.rows.length})</div>
+            {g.rows.length === 0 ? (
+              <p className="card-body text-weak">No items.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="table w-full min-w-[720px]">
+                  <thead>
+                    <tr><th>Candidate</th><th className="w-20">Role</th><th>Subject</th><th>{g.title === "Sent" ? "Sent To" : "Recipient"}</th>{g.title === "Sent" && <th>Sent On</th>}</tr>
+                  </thead>
+                  <tbody>
+                    {g.rows.map((c) => (
+                      <tr key={c.id}>
+                        <td className="whitespace-nowrap"><Link href={`/candidates/${c.id}`} className="link">{c.full_name ?? c.file_name}</Link></td>
+                        <td><Badge>{c.applied_role}</Badge></td>
+                        <td className="max-w-[340px] truncate">{c.email_subject}{c.email_error && <span className="ml-2 text-xs text-bad">{c.email_error}</span>}</td>
+                        <td className="text-weak">{c.email_status === "sent" ? c.sent_to : recipientFor(c)}</td>
+                        {g.title === "Sent" && <td className="whitespace-nowrap text-weak">{c.sent_at ? new Date(c.sent_at).toLocaleString() : ""}</td>}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        ))}
       </div>
-      {groups.map((g) => (
-        <Card key={g.title}>
-          <Eyebrow>{g.title} · {g.rows.length}</Eyebrow>
-          {g.rows.length === 0 ? (
-            <p className="mt-2 text-sm text-muted">None.</p>
-          ) : (
-            <ul className="mt-2 divide-y divide-rule/70 text-sm">
-              {g.rows.map((c) => (
-                <li key={c.id} className="flex flex-wrap items-center gap-3 py-2">
-                  <Link href={`/candidates/${c.id}`} className="min-w-44 font-medium hover:text-cargo">{c.full_name ?? c.file_name}</Link>
-                  <Pill>{c.applied_role}</Pill>
-                  <span className="flex-1 truncate text-muted">{c.email_subject}</span>
-                  <span className="font-mono text-xs text-muted">{c.email_status === "sent" ? c.sent_to : recipientFor(c)}</span>
-                  {c.email_error && <span className="text-xs text-stop">{c.email_error}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      ))}
-    </div>
+    </>
   );
 }

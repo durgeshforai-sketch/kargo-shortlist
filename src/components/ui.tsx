@@ -1,56 +1,77 @@
 import type { ReactNode } from "react";
+import { IconTile, type IconName } from "./icons";
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-lg border border-rule bg-card p-5 ${className}`}>{children}</section>;
+export function PageHeader({ icon, object, title, meta, actions }: { icon: IconName; object: string; title: string; meta?: ReactNode; actions?: ReactNode }) {
+  return (
+    <div className="card mb-3 flex flex-wrap items-center gap-3 px-4 py-3">
+      <IconTile name={icon} />
+      <div className="min-w-0 flex-1 basis-[220px]">
+        <p className="text-xs text-weak">{object}</p>
+        <h1 className="truncate text-lg font-bold leading-tight">{title}</h1>
+        {meta && <p className="mt-0.5 text-xs text-weak">{meta}</p>}
+      </div>
+      {actions && <div className="flex w-full flex-wrap gap-2 sm:w-auto">{actions}</div>}
+    </div>
+  );
 }
 
-export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">{children}</p>;
+export function Card({ title, actions, children, className = "", bodyClass = "card-body" }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string; bodyClass?: string }) {
+  return (
+    <section className={`card ${className}`}>
+      {title && (
+        <div className="card-header">
+          <span>{title}</span>
+          {actions}
+        </div>
+      )}
+      <div className={bodyClass}>{children}</div>
+    </section>
+  );
 }
 
-const TONES = {
-  go: "bg-go-soft text-go",
-  hold: "bg-hold-soft text-hold",
-  stop: "bg-stop-soft text-stop",
-  cargo: "bg-cargo-soft text-cargo",
-  plain: "bg-paper text-muted border border-rule",
+const BADGES = {
+  ok: "bg-ok-soft text-[#194e31]",
+  warn: "bg-warn-soft text-warn",
+  bad: "bg-bad-soft text-bad",
+  brand: "bg-brand-soft text-brand-dark",
+  neutral: "bg-[#ececec] text-text",
 } as const;
 
-export function Pill({ tone = "plain", children, title }: { tone?: keyof typeof TONES; children: ReactNode; title?: string }) {
+export function Badge({ tone = "neutral", children, title }: { tone?: keyof typeof BADGES; children: ReactNode; title?: string }) {
   return (
-    <span title={title} className={`inline-flex items-center whitespace-nowrap rounded px-2 py-0.5 text-[11px] font-medium ${TONES[tone]}`}>
+    <span title={title} className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-[1px] text-xs ${BADGES[tone]}`}>
       {children}
     </span>
   );
 }
 
-export function ScoreBar({ value, muted = false }: { value: number | null; muted?: boolean }) {
-  const v = value ?? 0;
+export function Score({ value, muted = false }: { value: number | null; muted?: boolean }) {
+  if (value === null) return <span className="text-faint">–</span>;
+  const color = muted ? "#aeaeae" : value >= 70 ? "#2e844a" : value >= 45 ? "#dd7a01" : "#ba0517";
   return (
     <div className="flex items-center gap-2">
-      <div className="h-2 w-24 overflow-hidden rounded-full bg-rule/60">
-        <div className={`h-full ${muted ? "bg-muted/50" : v >= 70 ? "bg-go" : v >= 45 ? "bg-hold" : "bg-stop"}`} style={{ width: `${v}%` }} />
+      <span className={`w-7 text-right tabular-nums ${muted ? "text-weak" : "font-semibold"}`}>{Math.round(value)}</span>
+      <div className="h-1.5 w-16 rounded-full bg-[#e5e5e5]">
+        <div className="h-full rounded-full" style={{ width: `${value}%`, background: color }} />
       </div>
-      <span className={`font-mono text-sm tabular-nums ${muted ? "text-muted" : "font-medium"}`}>{value === null ? "—" : v.toFixed(0)}</span>
     </div>
   );
 }
 
-export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
+export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-rule bg-card px-4 py-3">
-      <Eyebrow>{label}</Eyebrow>
-      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
-      {hint && <p className="text-xs text-muted">{hint}</p>}
+    <div className="min-w-0">
+      <p className="field-label">{label}</p>
+      <div className="mt-0.5 truncate text-[13px]">{children}</div>
     </div>
   );
 }
 
 export function SetupNotice({ message }: { message: string }) {
   return (
-    <Card className="border-hold/40 bg-hold-soft/50">
-      <p className="font-medium">The dashboard is not connected yet</p>
-      <p className="mt-1 text-sm text-muted">{message}</p>
-    </Card>
+    <div className="card border-l-4 border-l-warn px-4 py-3">
+      <p className="font-semibold">Unable to load records</p>
+      <p className="mt-1 text-weak">{message}</p>
+    </div>
   );
 }

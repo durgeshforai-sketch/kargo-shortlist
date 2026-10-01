@@ -10,29 +10,24 @@ export function TierControls({ id, tier, source, locked }: { id: string; tier: s
   async function act(path: string, init: RequestInit, label: string) {
     setBusy(label);
     await fetch(path, init);
-    // Regenerate the brief/draft for the new tier straight away.
-    await fetch("/api/drafts", { method: "POST" });
+    await fetch("/api/drafts", { method: "POST" }); // regenerate the brief/draft for the new recommendation
     setBusy(null);
     router.refresh();
   }
-  const patch = (t: string) => act(`/api/candidates/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ tier: t }) }, t);
+  const set = (t: string) => act(`/api/candidates/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ tier: t }) }, t);
 
   return (
-    <div className="flex flex-wrap gap-2 text-sm">
+    <div className="flex flex-wrap gap-2">
       {!locked && tier !== "interview" && (
-        <button onClick={() => patch("interview")} disabled={!!busy} className="rounded border border-go/40 px-3 py-1.5 text-go hover:bg-go-soft">
-          {busy === "interview" ? "…" : "Move to interview"}
-        </button>
+        <button onClick={() => set("interview")} disabled={!!busy} className="btn">{busy === "interview" ? "Saving…" : "Move to Interview"}</button>
       )}
       {!locked && tier !== "decline" && (
-        <button onClick={() => patch("decline")} disabled={!!busy} className="rounded border border-stop/40 px-3 py-1.5 text-stop hover:bg-stop-soft">
-          {busy === "decline" ? "…" : "Move below the line"}
-        </button>
+        <button onClick={() => set("decline")} disabled={!!busy} className="btn btn-danger">{busy === "decline" ? "Saving…" : "Decline"}</button>
       )}
       {!locked && source === "founder" && (
-        <button onClick={() => patch("system")} disabled={!!busy} className="rounded border border-rule px-3 py-1.5 text-muted">Undo my override</button>
+        <button onClick={() => set("system")} disabled={!!busy} className="btn">Reset to System</button>
       )}
-      <button onClick={() => act(`/api/candidates/${id}/rescore`, { method: "POST" }, "rescore")} disabled={!!busy || locked} className="rounded border border-rule px-3 py-1.5 text-muted hover:text-ink">
+      <button onClick={() => act(`/api/candidates/${id}/rescore`, { method: "POST" }, "rescore")} disabled={!!busy || locked} className="btn">
         {busy === "rescore" ? "Re-scoring…" : "Re-score"}
       </button>
     </div>

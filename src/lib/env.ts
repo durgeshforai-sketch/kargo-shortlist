@@ -15,7 +15,6 @@ export const env = {
   emailReplyTo: read("EMAIL_REPLY_TO"),
   // When set, every email goes here instead of the candidate's address.
   testRecipient: read("EMAIL_TEST_RECIPIENT"),
-  dashboardPassword: read("DASHBOARD_PASSWORD"),
   isProd: process.env.VERCEL_ENV === "production",
 };
 
